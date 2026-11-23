@@ -136,17 +136,25 @@ $sections = [
                             <h2><?= escape_html($section['title']) ?></h2>
                             <span class="scroll-hint">Geser untuk melihat lebih banyak</span>
                         </div>
-                        <div class="media-row" tabindex="0" aria-label="<?= escape_html($section['title']) ?>">
-                            <?php foreach ($section['items'] as $item): ?>
-                                <article class="media-card">
-                                    <div class="poster <?= escape_html($item['style']) ?>">
-                                        <span class="poster-label">IFLIX ORIGINAL</span>
-                                        <span class="poster-title"><?= escape_html($item['title']) ?></span>
-                                    </div>
-                                    <h3><?= escape_html($item['title']) ?></h3>
-                                    <p><?= escape_html($item['category']) ?></p>
-                                </article>
-                            <?php endforeach; ?>
+                        <div class="media-carousel">
+                            <button class="carousel-control carousel-previous" type="button" aria-label="Geser ke kiri" hidden>
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                            </button>
+                            <div class="media-row" tabindex="0" aria-label="<?= escape_html($section['title']) ?>">
+                                <?php foreach ($section['items'] as $item): ?>
+                                    <article class="media-card">
+                                        <div class="poster <?= escape_html($item['style']) ?>">
+                                            <span class="poster-label">IFLIX ORIGINAL</span>
+                                            <span class="poster-title"><?= escape_html($item['title']) ?></span>
+                                        </div>
+                                        <h3><?= escape_html($item['title']) ?></h3>
+                                        <p><?= escape_html($item['category']) ?></p>
+                                    </article>
+                                <?php endforeach; ?>
+                            </div>
+                            <button class="carousel-control carousel-next" type="button" aria-label="Geser ke kanan">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                            </button>
                         </div>
                     </section>
                 <?php endforeach; ?>
@@ -180,7 +188,36 @@ $sections = [
         const searchResults = document.querySelector('#search-results');
         const mediaCards = Array.from(document.querySelectorAll('.media-card'));
         const contentSections = Array.from(document.querySelectorAll('.content-section'));
+        const mediaCarousels = Array.from(document.querySelectorAll('.media-carousel'));
         const emptySearch = document.querySelector('#empty-search');
+
+        function updateCarouselControls(carousel) {
+            const row = carousel.querySelector('.media-row');
+            const previous = carousel.querySelector('.carousel-previous');
+            const next = carousel.querySelector('.carousel-next');
+
+            previous.hidden = row.scrollLeft <= 1;
+            next.hidden = row.scrollLeft + row.clientWidth >= row.scrollWidth - 1;
+        }
+
+        mediaCarousels.forEach((carousel) => {
+            const row = carousel.querySelector('.media-row');
+            const previous = carousel.querySelector('.carousel-previous');
+            const next = carousel.querySelector('.carousel-next');
+
+            previous.addEventListener('click', () => {
+                row.scrollBy({ left: -row.clientWidth * 0.8, behavior: 'smooth' });
+            });
+            next.addEventListener('click', () => {
+                row.scrollBy({ left: row.clientWidth * 0.8, behavior: 'smooth' });
+            });
+            row.addEventListener('scroll', () => updateCarouselControls(carousel), { passive: true });
+            updateCarouselControls(carousel);
+        });
+
+        window.addEventListener('resize', () => {
+            mediaCarousels.forEach(updateCarouselControls);
+        });
 
         function revealCard(card) {
             searchResults.hidden = true;
@@ -215,6 +252,7 @@ $sections = [
             contentSections.forEach((section) => {
                 section.hidden = !section.querySelector('.media-card:not([hidden])');
             });
+            mediaCarousels.forEach(updateCarouselControls);
 
             searchResults.replaceChildren();
             suggestions.slice(0, 6).forEach((suggestion) => {
