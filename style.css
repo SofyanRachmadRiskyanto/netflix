@@ -806,6 +806,7 @@ body {
 
 .home-footer {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
     margin-top: auto;
@@ -815,9 +816,89 @@ body {
     font-size: 13px;
 }
 
-.home-footer span:first-child {
+.footer-brand {
     color: #42d4e8;
     font-weight: 800;
+}
+
+.social-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.social-link {
+    display: inline-flex;
+    width: 26px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    color: #f5f7fa;
+    text-decoration: none;
+    transition: color 160ms ease, transform 160ms ease;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+    color: #42d4e8;
+    transform: translateY(-2px);
+}
+
+.social-facebook {
+    align-items: flex-end;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 29px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.instagram-mark {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    border: 2px solid currentColor;
+    border-radius: 7px;
+}
+
+.instagram-mark::before {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 10px;
+    height: 10px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    content: "";
+}
+
+.instagram-mark::after {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+}
+
+.social-x {
+    font-size: 25px;
+    font-weight: 400;
+    letter-spacing: -2px;
+}
+
+.youtube-mark {
+    width: 25px;
+    height: 25px;
+}
+
+.youtube-mark rect {
+    fill: currentColor;
+}
+
+.youtube-mark path {
+    fill: #0a1018;
 }
 
 @media (max-width: 900px) {
@@ -984,6 +1065,7 @@ body {
 
     .home-footer {
         flex-direction: column;
+        align-items: flex-start;
         padding: 18px;
     }
 }

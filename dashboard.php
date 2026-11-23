@@ -155,7 +155,20 @@ $sections = [
         </main>
 
         <footer class="home-footer">
-            <span>iflix</span>
+            <span class="footer-brand">iflix</span>
+            <nav class="social-links" aria-label="Media sosial">
+                <a class="social-link social-facebook" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">f</a>
+                <a class="social-link" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+                    <span class="instagram-mark" aria-hidden="true"></span>
+                </a>
+                <a class="social-link social-x" href="https://x.com/" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">X</a>
+                <a class="social-link" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+                    <svg class="youtube-mark" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="2" y="5" width="20" height="14" rx="4"></rect>
+                        <path d="m10 9 6 3-6 3z"></path>
+                    </svg>
+                </a>
+            </nav>
             <span>Jelajahi cerita baru setiap hari.</span>
         </footer>
     </div>
