@@ -62,13 +62,17 @@ $sections = [
             <div class="home-account">
                 <div class="home-tools">
                     <div class="search-control" role="search">
-                        <button class="icon-button" id="search-toggle" type="button" aria-label="Buka pencarian" aria-controls="catalog-search" aria-expanded="false">
+                        <button class="icon-button" id="search-toggle" type="button" aria-label="Buka pencarian" aria-controls="search-entry" aria-expanded="false">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <circle cx="10.8" cy="10.8" r="6.8"></circle>
                                 <path d="m16 16 5 5"></path>
                             </svg>
                         </button>
-                        <input class="search-input" id="catalog-search" type="search" placeholder="Cari judul..." aria-label="Cari judul" autocomplete="off" hidden>
+                        <div class="search-entry" id="search-entry" hidden>
+                            <input class="search-input" id="catalog-search" type="text" role="searchbox" inputmode="search" placeholder="Cari judul..." aria-label="Cari judul" aria-autocomplete="list" aria-controls="search-results" aria-expanded="false" autocomplete="off">
+                            <button class="search-clear" id="search-clear" type="button" aria-label="Hapus pencarian">&times;</button>
+                        </div>
+                        <div class="search-results" id="search-results" role="listbox" aria-label="Hasil pencarian" hidden></div>
                     </div>
                     <details class="notification-control">
                         <summary class="icon-button" aria-label="Buka notifikasi">
@@ -157,46 +161,120 @@ $sections = [
     </div>
     <script>
         const searchToggle = document.querySelector('#search-toggle');
+        const searchEntry = document.querySelector('#search-entry');
         const searchInput = document.querySelector('#catalog-search');
+        const searchClear = document.querySelector('#search-clear');
+        const searchResults = document.querySelector('#search-results');
         const mediaCards = Array.from(document.querySelectorAll('.media-card'));
         const contentSections = Array.from(document.querySelectorAll('.content-section'));
         const emptySearch = document.querySelector('#empty-search');
 
+        function revealCard(card) {
+            searchResults.hidden = true;
+            searchInput.setAttribute('aria-expanded', 'false');
+            card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+            card.classList.add('search-result-highlight');
+            window.setTimeout(() => card.classList.remove('search-result-highlight'), 1800);
+        }
+
         function filterCatalog() {
             const query = searchInput.value.trim().toLocaleLowerCase('id-ID');
             let hasResults = false;
+            const suggestions = [];
+            const seenTitles = new Set();
 
             mediaCards.forEach((card) => {
+                const title = card.querySelector('h3').textContent.trim();
                 const matches = card.textContent.toLocaleLowerCase('id-ID').includes(query);
                 card.hidden = !matches;
                 hasResults = hasResults || matches;
+
+                if (query !== '' && matches && !seenTitles.has(title)) {
+                    seenTitles.add(title);
+                    suggestions.push({
+                        title,
+                        category: card.querySelector('p').textContent.trim(),
+                        card,
+                    });
+                }
             });
 
             contentSections.forEach((section) => {
                 section.hidden = !section.querySelector('.media-card:not([hidden])');
             });
 
-            emptySearch.hidden = hasResults;
+            searchResults.replaceChildren();
+            suggestions.slice(0, 6).forEach((suggestion) => {
+                const result = document.createElement('button');
+                const title = document.createElement('strong');
+                const category = document.createElement('span');
+
+                result.className = 'search-result';
+                result.type = 'button';
+                result.setAttribute('role', 'option');
+                title.textContent = suggestion.title;
+                category.textContent = suggestion.category;
+                result.append(title, category);
+                result.addEventListener('click', () => {
+                    revealCard(suggestion.card);
+                });
+                searchResults.append(result);
+            });
+
+            searchResults.hidden = suggestions.length === 0;
+            searchInput.setAttribute('aria-expanded', String(suggestions.length > 0));
+            emptySearch.hidden = hasResults || query === '';
+        }
+
+        function executeSearch() {
+            const firstResult = mediaCards.find((card) => !card.hidden);
+            if (firstResult) {
+                revealCard(firstResult);
+            }
+        }
+
+        function closeSearch() {
+            searchEntry.hidden = true;
+            searchResults.hidden = true;
+            searchToggle.setAttribute('aria-expanded', 'false');
+            searchToggle.setAttribute('aria-label', 'Buka pencarian');
+            searchInput.setAttribute('aria-expanded', 'false');
+            searchInput.value = '';
+            filterCatalog();
         }
 
         searchToggle.addEventListener('click', () => {
-            const isOpening = searchInput.hidden;
-            searchInput.hidden = !isOpening;
-            searchToggle.setAttribute('aria-expanded', String(isOpening));
-
-            if (isOpening) {
+            if (searchEntry.hidden) {
+                searchEntry.hidden = false;
+                searchToggle.setAttribute('aria-expanded', 'true');
+                searchToggle.setAttribute('aria-label', 'Cari judul');
                 searchInput.focus();
+            } else if (searchInput.value.trim() !== '') {
+                executeSearch();
             } else {
-                searchInput.value = '';
-                filterCatalog();
+                searchInput.focus();
             }
+        });
+
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            filterCatalog();
+            searchInput.focus();
         });
 
         searchInput.addEventListener('input', filterCatalog);
         searchInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                searchToggle.click();
-                searchToggle.focus();
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                executeSearch();
+            } else if (event.key === 'Escape') {
+                if (!searchResults.hidden) {
+                    searchResults.hidden = true;
+                    searchInput.setAttribute('aria-expanded', 'false');
+                } else {
+                    closeSearch();
+                    searchToggle.focus();
+                }
             }
         });
     </script>
